@@ -34,7 +34,7 @@ extern HardwareSPI SPI;
 #define IF_SERIAL_DEBUG(x) ({x;})
 #else
 #define IF_SERIAL_DEBUG(x)
-#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny85__)
+#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny85__) || defined(__MSP430__)
 #define printf_P(...)
 #endif
 #endif
@@ -49,10 +49,18 @@ extern HardwareSPI SPI;
 #endif
 #endif
 
+#if defined(ENERGIA)
+#define strlen_P strlen
+#define pgm_read_byte(p) (*(p)) 
+#define pgm_read_word(p) (*(p)) 
+#define PRIPSTR "%s"
+#define _BV(x) (1 << (x))
+
+#elif defined(ARDUINO)
 // Progmem is Arduino-specific
-#ifdef ARDUINO
 #include <avr/pgmspace.h>
 #define PRIPSTR "%S"
+
 #else
 typedef char const char;
 typedef uint16_t prog_uint16_t;
