@@ -18,7 +18,19 @@
 
 #include <Arduino.h>
 
-int serial_putc( char c, FILE * ) 
+#ifdef ENERGIA
+int putchar(int c)
+{
+  Serial.write( c );
+  return c;
+}
+
+void printf_begin(void)
+{
+}
+
+#else
+int serial_putc( char c, struct FILE * ) 
 {
   Serial.write( c );
 
@@ -27,7 +39,8 @@ int serial_putc( char c, FILE * )
 
 void printf_begin(void)
 {
-  fdevopen( &serial_putc, 0 );
+   fdevopen( &serial_putc, 0 );
 }
+#endif
 
 #endif // __PRINTF_H__
