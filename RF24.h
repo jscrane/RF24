@@ -40,6 +40,20 @@ typedef enum { RF24_1MBPS = 0, RF24_2MBPS, RF24_250KBPS } rf24_datarate_e;
  */
 typedef enum { RF24_CRC_DISABLED = 0, RF24_CRC_8, RF24_CRC_16 } rf24_crclength_e;
 
+class RF24Debug
+{
+public:
+  /**
+   * Callbacks from RF24
+   */
+  virtual void on_write_register(uint8_t reg, uint8_t value) {}
+  virtual void observe_tx(uint8_t tx) {}
+  virtual void on_ack(uint8_t ack_len) {}
+  virtual void on_status(uint8_t status) {}
+  virtual void on_write_payload(uint8_t data_len, uint8_t blank_len) {}
+  virtual void on_read_payload(uint8_t data_len, uint8_t blank_len) {}
+};
+
 /**
  * Driver for nRF24L01(+) 2.4GHz Wireless Transceiver
  */
@@ -56,8 +70,11 @@ private:
   bool dynamic_payloads_enabled; /**< Whether dynamic payloads are enabled. */ 
   uint8_t ack_payload_length; /**< Dynamic size of pending ack payload. */
   uint64_t pipe0_reading_address; /**< Last address set on pipe 0 for reading. */
+  friend class SerialDebug;
+  RF24Debug *dbg;
 
 protected:
+
   /**
    * @name Low-level internal interface.
    *
@@ -166,50 +183,6 @@ protected:
    * @return Current value of status register
    */
   uint8_t get_status(void);
-
-  /**
-   * Decode and print the given status to stdout
-   *
-   * @param status Status value to print
-   *
-   * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
-   */
-  void print_status(uint8_t status);
-
-  /**
-   * Decode and print the given 'observe_tx' value to stdout
-   *
-   * @param value The observe_tx value to print
-   *
-   * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
-   */
-  void print_observe_tx(uint8_t value);
-
-  /**
-   * Print the name and value of an 8-bit register to stdout
-   *
-   * Optionally it can print some quantity of successive
-   * registers on the same line.  This is useful for printing a group
-   * of related registers on one line.
-   *
-   * @param name Name of the register
-   * @param reg Which register. Use constants from nRF24L01.h
-   * @param qty How many successive registers to print
-   */
-  void print_byte_register(const char* name, uint8_t reg, uint8_t qty = 1);
-
-  /**
-   * Print the name and value of a 40-bit address register to stdout
-   *
-   * Optionally it can print some quantity of successive
-   * registers on the same line.  This is useful for printing a group
-   * of related registers on one line.
-   *
-   * @param name Name of the register
-   * @param reg Which register. Use constants from nRF24L01.h
-   * @param qty How many successive registers to print
-   */
-  void print_address_register(const char* name, uint8_t reg, uint8_t qty = 1);
 
   /**
    * Turn on or off the special features of the chip
@@ -557,13 +530,6 @@ public:
    *  Methods you can use to drive the chip in more advanced ways 
    */
   /**@{*/
-
-  /**
-   * Print a giant block of debugging information to stdout
-   *
-   * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
-   */
-  void printDetails(void);
 
   /**
    * Enter low-power mode

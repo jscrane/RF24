@@ -29,16 +29,6 @@ extern HardwareSPI SPI;
 #define _BV(x) (1<<(x))
 #endif
 
-#undef SERIAL_DEBUG
-#ifdef SERIAL_DEBUG
-#define IF_SERIAL_DEBUG(x) ({x;})
-#else
-#define IF_SERIAL_DEBUG(x)
-#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny85__) || defined(__MSP430__)
-#define printf_P(...)
-#endif
-#endif
-
 // Avoid spurious warnings
 #if 1
 #if ! defined( NATIVE ) && defined( ARDUINO )
