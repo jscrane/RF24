@@ -14,15 +14,6 @@ protected:
   void print_status(uint8_t status);
 
   /**
-   * Decode and print the given 'observe_tx' value to stdout
-   *
-   * @param value The observe_tx value to print
-   *
-   * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
-   */
-  void print_observe_tx(uint8_t value);
-
-  /**
    * Print the name and value of an 8-bit register to stdout
    *
    * Optionally it can print some quantity of successive

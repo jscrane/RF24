@@ -3,17 +3,6 @@
 
 /****************************************************************************/
 
-void SerialDebug::print_observe_tx(uint8_t value)
-{
-  printf_P(PSTR("OBSERVE_TX=%02x: POLS_CNT=%x ARC_CNT=%x\r\n"),
-           value,
-           (value >> PLOS_CNT) & B1111,
-           (value >> ARC_CNT) & B1111
-          );
-}
-
-/****************************************************************************/
-
 void SerialDebug::print_byte_register(const char* name, uint8_t reg, uint8_t qty)
 {
   char extra_tab = strlen_P(name) < 8 ? '\t' : 0;
@@ -120,9 +109,12 @@ void SerialDebug::on_write_register(uint8_t reg, uint8_t value)
   printf_P(PSTR("write_register(%02x,%02x)\r\n"),reg,value);
 }
 
-void SerialDebug::observe_tx(uint8_t observe_tx)
+void SerialDebug::observe_tx(uint8_t value)
 {
-  Serial.print(observe_tx,HEX);
+  printf_P(PSTR("OBSERVE_TX=%02x: POLS_CNT=%x ARC_CNT=%x\r\n"),
+           value,
+           (value >> PLOS_CNT) & B1111,
+           (value >> ARC_CNT) & B1111);
 }
 
 void SerialDebug::on_status(uint8_t status)
