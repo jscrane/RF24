@@ -104,7 +104,7 @@ uint8_t RF24::write_payload(const void* buf, uint8_t len, const uint8_t writeTyp
   uint8_t data_len = min(len,payload_size);
   uint8_t blank_len = dynamic_payloads_enabled ? 0 : payload_size - data_len;
 
-  //printf("[Writing %u bytes %u blanks]",data_len,blank_len);
+  //printf_P("[Writing %u bytes %u blanks]",data_len,blank_len);
 
   csn(LOW);
   status = SPI.transfer( writeType );
@@ -127,7 +127,7 @@ uint8_t RF24::read_payload(void* buf, uint8_t len)
   uint8_t data_len = min(len,payload_size);
   uint8_t blank_len = dynamic_payloads_enabled ? 0 : payload_size - data_len;
   
-  //printf("[Reading %u bytes %u blanks]",data_len,blank_len);
+  //printf_P("[Reading %u bytes %u blanks]",data_len,blank_len);
   
   csn(LOW);
   status = SPI.transfer( R_RX_PAYLOAD );
@@ -490,7 +490,7 @@ bool RF24::write( const void* buf, uint8_t len, const bool multicast )
   bool tx_ok, tx_fail;
   whatHappened(tx_ok,tx_fail,ack_payload_available);
 
-  //printf("%u%u%u\r\n",tx_ok,tx_fail,ack_payload_available);
+  //printf_P("%u%u%u\r\n",tx_ok,tx_fail,ack_payload_available);
 
   result = tx_ok;
   IF_SERIAL_DEBUG(Serial.print(result?"...OK.":"...Failed"));
@@ -688,7 +688,7 @@ void RF24::enableDynamicPayloads(void)
     write_register(FEATURE,read_register(FEATURE) | _BV(EN_DPL) );
   }
 
-  IF_SERIAL_DEBUG(printf("FEATURE=%i\r\n",read_register(FEATURE)));
+  IF_SERIAL_DEBUG(printf_P("FEATURE=%i\r\n",read_register(FEATURE)));
 
   // Enable dynamic payload on all pipes
   //
@@ -717,7 +717,7 @@ void RF24::enableAckPayload(void)
     write_register(FEATURE,read_register(FEATURE) | _BV(EN_DYN_ACK) | _BV(EN_ACK_PAY) | _BV(EN_DPL) );
   }
 
-  IF_SERIAL_DEBUG(printf("FEATURE=%i\r\n",read_register(FEATURE)));
+  IF_SERIAL_DEBUG(printf_P("FEATURE=%i\r\n",read_register(FEATURE)));
 
   //
   // Enable dynamic payload on pipes 0 & 1
