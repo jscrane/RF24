@@ -33,7 +33,8 @@ extern HardwareSPI SPI;
 #if 1
 #if ! defined( NATIVE ) && defined( ARDUINO )
 #undef PROGMEM
-#define PROGMEM __attribute__(( section(".progmem.data") ))
+//#define PROGMEM __attribute__(( section(".progmem.data") ))
+#define PROGMEM
 #undef PSTR
 #define PSTR(s) (__extension__({static const char __c[] PROGMEM = (s); &__c[0];}))
 #endif
@@ -41,6 +42,7 @@ extern HardwareSPI SPI;
 
 #if defined(ENERGIA)
 #define strlen_P strlen
+#define printf_P printf
 #define pgm_read_byte(p) (*(p)) 
 #define pgm_read_word(p) (*(p)) 
 #define PRIPSTR "%s"

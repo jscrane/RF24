@@ -1,3 +1,4 @@
+#include "RF24_config.h"
 #include "RF24.h"
 #include "RF24SerialDebug.h"
 
@@ -98,10 +99,10 @@ void SerialDebug::printDetails(void)
   print_byte_register(PSTR("CONFIG"),CONFIG);
   print_byte_register(PSTR("DYNPD/FEATURE"),DYNPD,2);
 
-  printf_P(PSTR("Data Rate\t = %S\r\n"),pgm_read_word(&rf24_datarate_e_str_P[r.getDataRate()]));
-  printf_P(PSTR("Model\t\t = %S\r\n"),pgm_read_word(&rf24_model_e_str_P[r.isPVariant()]));
-  printf_P(PSTR("CRC Length\t = %S\r\n"),pgm_read_word(&rf24_crclength_e_str_P[r.getCRCLength()]));
-  printf_P(PSTR("PA Power\t = %S\r\n"),pgm_read_word(&rf24_pa_dbm_e_str_P[r.getPALevel()]));
+  printf_P(PSTR("Data Rate\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_datarate_e_str_P[r.getDataRate()]));
+  printf_P(PSTR("Model\t\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_model_e_str_P[r.isPVariant()]));
+  printf_P(PSTR("CRC Length\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_crclength_e_str_P[r.getCRCLength()]));
+  printf_P(PSTR("PA Power\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_pa_dbm_e_str_P[r.getPALevel()]));
 }
 
 void SerialDebug::on_write_register(uint8_t reg, uint8_t value)
@@ -111,7 +112,7 @@ void SerialDebug::on_write_register(uint8_t reg, uint8_t value)
 
 void SerialDebug::observe_tx(uint8_t value)
 {
-  printf_P(PSTR("OBSERVE_TX=%02x: POLS_CNT=%x ARC_CNT=%x\r\n"),
+  printf_P(PSTR("OBSERVE_TX=%02x: PLOS_CNT=%x ARC_CNT=%x\r\n"),
            value,
            (value >> PLOS_CNT) & B1111,
            (value >> ARC_CNT) & B1111);
