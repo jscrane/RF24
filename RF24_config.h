@@ -29,17 +29,6 @@ extern HardwareSPI SPI;
 #define _BV(x) (1<<(x))
 #endif
 
-// Avoid spurious warnings
-#if 1
-#if ! defined( NATIVE ) && defined( ARDUINO )
-#undef PROGMEM
-//#define PROGMEM __attribute__(( section(".progmem.data") ))
-#define PROGMEM
-#undef PSTR
-#define PSTR(s) (__extension__({static const char __c[] PROGMEM = (s); &__c[0];}))
-#endif
-#endif
-
 #if defined(ENERGIA)
 #define strlen_P strlen
 #define printf_P printf
@@ -47,6 +36,8 @@ extern HardwareSPI SPI;
 #define pgm_read_word(p) (*(p)) 
 #define PRIPSTR "%s"
 #define _BV(x) (1 << (x))
+#define PROGMEM
+#define PSTR(s) (s)
 
 #elif defined(ARDUINO)
 // Progmem is Arduino-specific
