@@ -52,6 +52,11 @@ public:
   virtual void on_status(uint8_t status) {}
   virtual void on_write_payload(uint8_t data_len, uint8_t blank_len) {}
   virtual void on_read_payload(uint8_t data_len, uint8_t blank_len) {}
+
+  /**
+   * Backwards-compatibility
+   */
+  virtual void printDetails(void) {}
 };
 
 /**
@@ -530,6 +535,15 @@ public:
    *  Methods you can use to drive the chip in more advanced ways 
    */
   /**@{*/
+
+  /**
+   * Print a giant block of debugging information to stdout
+   *
+   * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
+   * @warning Also does nothing if a real RF24Debug isn't configured. See
+   * RF24SerialDebug.h
+   */
+  void printDetails(void) { if (dbg) dbg->printDetails(); }
 
   /**
    * Enter low-power mode
