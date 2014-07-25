@@ -17,6 +17,7 @@
 
 #include <SPI.h>
 #include <RF24.h>
+#include <RF24SerialDebug.h>
 #include "printf.h"
 
 //
@@ -25,7 +26,8 @@
 
 // Set up nRF24L01 radio on SPI bus plus pins 8 & 9
 
-RF24 radio(8,9);
+RF24 radio(9,10);
+SerialDebug dbg(radio);
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
 // Leave open to be the 'ping' transmitter
@@ -135,7 +137,7 @@ void setup(void)
   // Dump the configuration of the rf unit for debugging
   //
 
-  radio.printDetails();
+  dbg.printDetails();
 }
 
 void loop(void)
