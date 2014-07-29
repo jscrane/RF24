@@ -75,10 +75,11 @@ private:
   bool dynamic_payloads_enabled; /**< Whether dynamic payloads are enabled. */ 
   uint8_t ack_payload_length; /**< Dynamic size of pending ack payload. */
   uint64_t pipe0_reading_address; /**< Last address set on pipe 0 for reading. */
-  friend class SerialDebug;
   RF24Debug *dbg;
 
 protected:
+
+friend class SerialDebug;
 
   /**
    * @name Low-level internal interface.
@@ -216,6 +217,8 @@ public:
    * @param _cspin The pin attached to Chip Select
    */
   RF24(uint8_t _cepin, uint8_t _cspin);
+
+  void setDebug(RF24Debug *dbg) { this->dbg = dbg; }
 
   /**
    * Begin operation of the chip
