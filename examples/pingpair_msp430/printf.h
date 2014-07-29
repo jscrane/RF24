@@ -19,6 +19,7 @@
 #include <Arduino.h>
 
 #ifdef ENERGIA
+#undef putchar
 extern "C" {
   int putchar(int c)
   {
