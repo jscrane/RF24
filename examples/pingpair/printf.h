@@ -33,7 +33,7 @@ void printf_begin(void)
 }
 
 #else
-int serial_putc( char c, struct FILE * ) 
+int serial_putc( char c, FILE * ) 
 {
   Serial.write( c );
 
