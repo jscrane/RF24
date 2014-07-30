@@ -21,17 +21,27 @@
 #include "printf.h"
 
 //
-// Hardware configuration
+// Hardware configuration: first MSP430, then ATMega
 //
 
-// Set up nRF24L01 radio on SPI bus plus pins 8 & 9
+#if defined(ENERGIA)
+#	define CE	P2_1
+#	define CS	P2_0
+#	define ROLE	P2_2
+#	define BAUD	9600
+#else
+#	define CE	9
+#	define CS	10
+#	define ROLE	7
+#	define BAUD	57600
+#endif
 
-RF24 radio(9,10);
+RF24 radio(CE, CS);
 SerialDebug dbg(radio);
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
 // Leave open to be the 'ping' transmitter
-const int role_pin = 7;
+const int role_pin = ROLE;
 
 //
 // Topology
@@ -67,7 +77,7 @@ void setup(void)
 
   // set up the role pin
   pinMode(role_pin, INPUT);
-  digitalWrite(role_pin,HIGH);
+  digitalWrite(role_pin, HIGH);
   delay(20); // Just to get a solid reading on the role pin
 
   // read the address pin, establish our role
@@ -80,10 +90,10 @@ void setup(void)
   // Print preamble
   //
 
-  Serial.begin(57600);
+  Serial.begin(BAUD);
   printf_begin();
-  printf("\n\rRF24/examples/pingpair/\n\r");
-  printf("ROLE: %s\n\r",role_friendly_name[role]);
+  printf_P("RF24/examples/pingpair/\n\r");
+  printf_P("ROLE: %s\n\r",role_friendly_name[role]);
 
   //
   // Setup and configure rf radio
@@ -122,9 +132,9 @@ void setup(void)
   // Start listening
   //
   // if( radio.setDataRate( RF24_250KBPS ) ) {
-  //   printf( "Data rate 250KBPS set!\n\r" ) ;
+  //   printf_P( "Data rate 250KBPS set!\n\r" ) ;
   // } else {
-  //   printf( "Data rate 250KBPS set FAILED!!\n\r" ) ;
+  //   printf_P( "Data rate 250KBPS set FAILED!!\n\r" ) ;
   // }
   // radio.setDataRate( RF24_2MBPS ) ;
   // radio.setPALevel( RF24_PA_MAX ) ;
@@ -153,7 +163,7 @@ void loop(void)
 
     // Take the time, and send it.  This will block until complete
     unsigned long time = millis();
-    printf("Now sending %lu...",time);
+    printf_P("Now sending %lu...",time);
     radio.write( &time, sizeof(unsigned long) );
 
     // Now, continue listening
@@ -163,14 +173,15 @@ void loop(void)
     unsigned long started_waiting_at = millis();
     bool timeout = false;
     while ( ! radio.available() && ! timeout )
-      if (millis() - started_waiting_at > 1+(radio.getMaxTimeout()/1000) )
+//      if (millis() - started_waiting_at > 1+(radio.getMaxTimeout()/1000) )
+      if (millis() - started_waiting_at > 250 )
         timeout = true;
 
     // Describe the results
     if ( timeout )
     {
-      printf("Failed, response timed out.\n\r");
-      printf("Timeout duration: %d\n\r", (1+radio.getMaxTimeout()/1000) ) ;
+      printf_P("Failed, response timed out.\n\r");
+      printf_P("Timeout duration: %d\n\r", (1+radio.getMaxTimeout()/1000) ) ;
     }
     else
     {
@@ -179,11 +190,11 @@ void loop(void)
       radio.read( &got_time, sizeof(unsigned long) );
 
       // Spew it
-      printf("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);
+      printf_P("Got response %lu, round-trip delay: %lu\n\r",got_time,millis()-got_time);
     }
 
-    // Try again 1s later
-    delay(1000);
+    // Try again 5s later
+    delay(5000);
   }
 
   //
@@ -210,7 +221,7 @@ void loop(void)
       // Send the final one back. This way, we don't delay
       // the reply while we wait on serial i/o.
       radio.write( &got_time, sizeof(unsigned long) );
-      printf("Sent response %lu\n\r", got_time);
+      printf_P("Sent response %lu\n\r", got_time);
 
       // Now, resume listening so we catch the next packets.
       radio.startListening();
