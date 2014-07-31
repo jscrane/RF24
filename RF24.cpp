@@ -83,8 +83,7 @@ uint8_t RF24::write_register(uint8_t reg, uint8_t value)
 {
   uint8_t status;
 
-  if (dbg)
-    dbg->on_write_register(reg, value);
+  on_write_register(reg, value);
 
   csn(LOW);
   status = SPI.transfer( W_REGISTER | ( REGISTER_MASK & reg ) );
@@ -105,8 +104,7 @@ uint8_t RF24::write_payload(const void* buf, uint8_t len, const uint8_t writeTyp
   uint8_t data_len = min(len,payload_size);
   uint8_t blank_len = dynamic_payloads_enabled ? 0 : payload_size - data_len;
 
-  if (dbg)
-    dbg->on_write_payload(data_len, blank_len);
+  on_write_payload(data_len, blank_len);
 
   csn(LOW);
   status = SPI.transfer( writeType );
@@ -129,8 +127,7 @@ uint8_t RF24::read_payload(void* buf, uint8_t len)
   uint8_t data_len = min(len,payload_size);
   uint8_t blank_len = dynamic_payloads_enabled ? 0 : payload_size - data_len;
   
-  if (dbg)
-    dbg->on_read_payload(data_len, blank_len);
+  on_read_payload(data_len, blank_len);
   
   csn(LOW);
   status = SPI.transfer( R_RX_PAYLOAD );
@@ -354,7 +351,7 @@ bool RF24::write( const void* buf, uint8_t len, const bool multicast )
 
   // IN the end, the send should be blocking.  It comes back in 60ms worst case.
   // Generally much faster.
-  uint8_t observe_tx;
+  uint8_t obs;
   uint8_t status;
   uint32_t sent_at = micros();
   const uint16_t timeout = getMaxTimeout() ; //us to wait for timeout
@@ -362,9 +359,8 @@ bool RF24::write( const void* buf, uint8_t len, const bool multicast )
   // Monitor the send
   do
   {
-    status = read_register(OBSERVE_TX,&observe_tx,1);
-    if (dbg)
-      dbg->observe_tx(observe_tx);
+    status = read_register(OBSERVE_TX, &obs, 1);
+    observe_tx(obs);
   }
   while( ! ( status & ( _BV(TX_DS) | _BV(MAX_RT) ) ) && ( micros() - sent_at < timeout ) );
 
@@ -388,8 +384,7 @@ bool RF24::write( const void* buf, uint8_t len, const bool multicast )
   if ( ack_payload_available )
   {
     ack_payload_length = getDynamicPayloadSize();
-    if (dbg)
-      dbg->on_ack(ack_payload_length);
+    on_ack(ack_payload_length);
   }
 
   return result;
@@ -482,8 +477,7 @@ void RF24::whatHappened(bool& tx_ok,bool& tx_fail,bool& rx_ready)
   // Or is that such a good idea?
   uint8_t status = write_register(STATUS,_BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT) );
 
-  if (dbg)
-    dbg->on_status(status);
+  on_status(status);
 
   // Report to the user what happened
   tx_ok = status & _BV(TX_DS);

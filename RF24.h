@@ -40,25 +40,6 @@ typedef enum { RF24_1MBPS = 0, RF24_2MBPS, RF24_250KBPS } rf24_datarate_e;
  */
 typedef enum { RF24_CRC_DISABLED = 0, RF24_CRC_8, RF24_CRC_16 } rf24_crclength_e;
 
-class RF24Debug
-{
-public:
-  /**
-   * Callbacks from RF24
-   */
-  virtual void on_write_register(uint8_t reg, uint8_t value) {}
-  virtual void observe_tx(uint8_t tx) {}
-  virtual void on_ack(uint8_t ack_len) {}
-  virtual void on_status(uint8_t status) {}
-  virtual void on_write_payload(uint8_t data_len, uint8_t blank_len) {}
-  virtual void on_read_payload(uint8_t data_len, uint8_t blank_len) {}
-
-  /**
-   * Backwards-compatibility
-   */
-  virtual void printDetails(void) {}
-};
-
 /**
  * Driver for nRF24L01(+) 2.4GHz Wireless Transceiver
  */
@@ -75,11 +56,14 @@ private:
   bool dynamic_payloads_enabled; /**< Whether dynamic payloads are enabled. */ 
   uint8_t ack_payload_length; /**< Dynamic size of pending ack payload. */
   uint64_t pipe0_reading_address; /**< Last address set on pipe 0 for reading. */
-  RF24Debug *dbg;
-
 protected:
-
-friend class SerialDebug;
+  /* debugging interface: does nothing by default */
+  virtual void on_write_register(uint8_t reg, uint8_t value) {}
+  virtual void observe_tx(uint8_t tx) {}
+  virtual void on_ack(uint8_t ack_len) {}
+  virtual void on_status(uint8_t status) {}
+  virtual void on_write_payload(uint8_t data_len, uint8_t blank_len) {}
+  virtual void on_read_payload(uint8_t data_len, uint8_t blank_len) {}
 
   /**
    * @name Low-level internal interface.
@@ -217,8 +201,6 @@ public:
    * @param _cspin The pin attached to Chip Select
    */
   RF24(uint8_t _cepin, uint8_t _cspin);
-
-  void setDebug(RF24Debug *dbg) { this->dbg = dbg; }
 
   /**
    * Begin operation of the chip
@@ -542,11 +524,9 @@ public:
   /**
    * Print a giant block of debugging information to stdout
    *
-   * @warning Does nothing if stdout is not defined.  See fdevopen in stdio.h
-   * @warning Also does nothing if a real RF24Debug isn't configured. See
-   * RF24SerialDebug.h
+   * @warning Does nothing by default
    */
-  void printDetails(void) { if (dbg) dbg->printDetails(); }
+  virtual void printDetails(void) {}
 
   /**
    * Enter low-power mode

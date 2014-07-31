@@ -1,9 +1,11 @@
-#ifndef __RF24_SERIAL_DEBUG_H
-#define __RF24_SERIAL_DEBUG_H
+#ifndef __RF24_DEBUG_H
+#define __RF24_DEBUG_H
 
-class SerialDebug: public RF24Debug
+#include <RF24.h>
+
+class RF24Debug: public RF24
 {
-protected:
+private:
   /**
    * Decode and print the given status to stdout
    *
@@ -39,7 +41,13 @@ protected:
    */
   void print_address_register(const char* name, uint8_t reg, uint8_t qty = 1);
 
-  RF24 &r;
+protected:
+  void on_write_register(uint8_t reg, uint8_t value);
+  void observe_tx(uint8_t tx);
+  void on_ack(uint8_t ack_len);
+  void on_status(uint8_t status);
+  void on_write_payload(uint8_t data_len, uint8_t blank_len);
+  void on_read_payload(uint8_t data_len, uint8_t blank_len);
 
 public:
   /**
@@ -49,17 +57,7 @@ public:
    */
   void printDetails(void);
 
-  SerialDebug(RF24 &radio);
-
-  /**
-   * Callbacks from RF24
-   */
-  void on_write_register(uint8_t reg, uint8_t value);
-  void observe_tx(uint8_t tx);
-  void on_ack(uint8_t ack_len);
-  void on_status(uint8_t status);
-  void on_write_payload(uint8_t data_len, uint8_t blank_len);
-  void on_read_payload(uint8_t data_len, uint8_t blank_len);
+  RF24Debug(uint8_t _cepin, uint8_t _cspin): RF24(_cepin, _cspin) {}
 };
 
 #endif
