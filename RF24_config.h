@@ -43,6 +43,7 @@ extern HardwareSPI SPI;
 #include <avr/pgmspace.h>
 
 #else
+// RPi maybe?
 typedef char const char;
 typedef uint16_t prog_uint16_t;
 #define PSTR(x) (x)

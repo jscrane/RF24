@@ -1,10 +1,15 @@
 #include "RF24_config.h"
 #include "RF24.h"
-#include "RF24Debug.h"
+
+#if defined(__AVR_ATtinyX4__) || defined(__AVR_ATtinyX5__)
+#  define FLASH_PTR(x) ((fstr_t *)x)
+#else
+#  define FLASH_PTR(x) ((const __FlashStringHelper *)x)
+#endif
 
 void RF24Debug::print_name(const prog_char *name)
 {
-  _out.print((const __FlashStringHelper *)name);
+  _out.print(FLASH_PTR(name));
   if (strlen_P(name) < 8)
     _out.print('\t');
   _out.print(F("\t ="));
@@ -113,13 +118,13 @@ void RF24Debug::printDetails(void)
   print_byte_register(PSTR("DYNPD/FEATURE"),DYNPD,2);
 
   _out.print(F("Data Rate\t = "));
-  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_datarate_e_str_P[getDataRate()]));
+  _out.println(FLASH_PTR(pgm_read_word(&rf24_datarate_e_str_P[getDataRate()])));
   _out.print(F("Model\t\t = "));
-  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_model_e_str_P[isPVariant()]));
+  _out.println(FLASH_PTR(pgm_read_word(&rf24_model_e_str_P[isPVariant()])));
   _out.print(F("CRC Length\t = "));
-  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_crclength_e_str_P[getCRCLength()]));
+  _out.println(FLASH_PTR(pgm_read_word(&rf24_crclength_e_str_P[getCRCLength()])));
   _out.print(F("PA Power\t = "));
-  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_pa_dbm_e_str_P[getPALevel()]));
+  _out.println(FLASH_PTR(pgm_read_word(&rf24_pa_dbm_e_str_P[getPALevel()])));
 }
 
 void RF24Debug::on_write_register(uint8_t reg, uint8_t value)
@@ -156,9 +161,9 @@ void RF24Debug::on_ack(uint8_t ack_len)
 void RF24Debug::on_write_payload(uint8_t data_len, uint8_t blank_len)
 {
   _out.print(F("Writing "));
-  _out.print(data_len);
+  _out.print(data_len, DEC);
   _out.print(F(" bytes "));
-  _out.println(blank_len);
+  _out.println(blank_len, DEC);
 }
 
 void RF24Debug::on_read_payload(uint8_t data_len, uint8_t blank_len)
