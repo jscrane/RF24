@@ -31,18 +31,16 @@ extern HardwareSPI SPI;
 
 #if defined(ENERGIA)
 #define strlen_P strlen
-#define printf_P printf
 #define pgm_read_byte(p) (*(p)) 
 #define pgm_read_word(p) (*(p)) 
-#define PRIPSTR "%s"
 #define _BV(x) (1 << (x))
 #define PROGMEM
 #define PSTR(s) (s)
+#define prog_char char
 
 #elif defined(ARDUINO)
 // Progmem is Arduino-specific
 #include <avr/pgmspace.h>
-#define PRIPSTR "%S"
 
 #else
 typedef char const char;
@@ -52,7 +50,6 @@ typedef uint16_t prog_uint16_t;
 #define strlen_P strlen
 #define PROGMEM
 #define pgm_read_word(p) (*(p)) 
-#define PRIPSTR "%s"
 #endif
 
 #endif // __RF24_CONFIG_H__

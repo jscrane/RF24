@@ -2,44 +2,65 @@
 #include "RF24.h"
 #include "RF24Debug.h"
 
-void RF24Debug::print_byte_register(const char* name, uint8_t reg, uint8_t qty)
+void RF24Debug::print_name(const prog_char *name)
 {
-  char extra_tab = strlen_P(name) < 8 ? '\t' : 0;
-  printf_P(PSTR(PRIPSTR"\t%c ="),name,extra_tab);
-  while (qty--)
-    printf_P(PSTR(" 0x%02x"), read_register(reg++));
-  printf_P(PSTR("\r\n"));
+  _out.print((const __FlashStringHelper *)name);
+  if (strlen_P(name) < 8)
+    _out.print('\t');
+  _out.print(F("\t ="));
 }
 
-void RF24Debug::print_address_register(const char* name, uint8_t reg, uint8_t qty)
+void RF24Debug::print_hex_byte(uint8_t b)
 {
-  char extra_tab = strlen_P(name) < 8 ? '\t' : 0;
-  printf_P(PSTR(PRIPSTR"\t%c ="),name,extra_tab);
+    _out.print(F(" 0x"));
+    if (b < 16)
+      _out.print('0');
+    _out.print(b, HEX);
+}
+
+void RF24Debug::print_byte_register(const prog_char *name, uint8_t reg, uint8_t qty)
+{
+  print_name(name);
+  while (qty--)
+    print_hex_byte(read_register(reg++));
+  _out.println();
+}
+
+void RF24Debug::print_address_register(const prog_char *name, uint8_t reg, uint8_t qty)
+{
+  print_name(name);
 
   while (qty--)
   {
     uint8_t buffer[5];
     read_register(reg++,buffer,sizeof buffer);
 
-    printf_P(PSTR(" 0x"));
+    _out.print(F(" 0x"));
     uint8_t* bufptr = buffer + sizeof buffer;
-    while( --bufptr >= buffer )
-      printf_P(PSTR("%02x"),*bufptr);
+    while( --bufptr >= buffer ) {
+      uint8_t b = *bufptr;
+      if (b < 10)
+        _out.print('0');
+      _out.print(b, HEX);
+    }
   }
-
-  printf_P(PSTR("\r\n"));
+  _out.println();
 }
 
 void RF24Debug::print_status(uint8_t status)
 {
-  printf_P(PSTR("STATUS\t\t = 0x%02x RX_DR=%x TX_DS=%x MAX_RT=%x RX_P_NO=%x TX_FULL=%x\r\n"),
-           status,
-           (status & _BV(RX_DR))?1:0,
-           (status & _BV(TX_DS))?1:0,
-           (status & _BV(MAX_RT))?1:0,
-           ((status >> RX_P_NO) & B111),
-           (status & _BV(TX_FULL))?1:0
-          );
+  print_name(PSTR("STATUS"));
+  print_hex_byte(status);
+  _out.print(F(" RX_DR="));
+  _out.print((status & _BV(RX_DR))? 1: 0);
+  _out.print(F(" TX_DS="));
+  _out.print((status & _BV(TX_DS))? 1: 0);
+  _out.print(F(" MAX_RT="));
+  _out.print((status & _BV(MAX_RT))? 1: 0);
+  _out.print(F(" RX_P_NO="));
+  _out.print((status >> RX_P_NO) & B111);
+  _out.print(F(" TX_FULL="));
+  _out.println((status & _BV(TX_FULL))? 1: 0);
 }
 
 static const char rf24_datarate_e_str_0[] PROGMEM = "1MBPS";
@@ -91,43 +112,59 @@ void RF24Debug::printDetails(void)
   print_byte_register(PSTR("CONFIG"),CONFIG);
   print_byte_register(PSTR("DYNPD/FEATURE"),DYNPD,2);
 
-  printf_P(PSTR("Data Rate\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_datarate_e_str_P[getDataRate()]));
-  printf_P(PSTR("Model\t\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_model_e_str_P[isPVariant()]));
-  printf_P(PSTR("CRC Length\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_crclength_e_str_P[getCRCLength()]));
-  printf_P(PSTR("PA Power\t = " PRIPSTR "\r\n"), pgm_read_word(&rf24_pa_dbm_e_str_P[getPALevel()]));
+  _out.print(F("Data Rate\t = "));
+  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_datarate_e_str_P[getDataRate()]));
+  _out.print(F("Model\t\t = "));
+  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_model_e_str_P[isPVariant()]));
+  _out.print(F("CRC Length\t = "));
+  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_crclength_e_str_P[getCRCLength()]));
+  _out.print(F("PA Power\t = "));
+  _out.println((const __FlashStringHelper *)pgm_read_word(&rf24_pa_dbm_e_str_P[getPALevel()]));
 }
 
 void RF24Debug::on_write_register(uint8_t reg, uint8_t value)
 {
-  printf_P(PSTR("write_register(%02x,%02x)\r\n"),reg,value);
+  _out.print(F("write_register("));
+  print_hex_byte(reg);
+  _out.print(',');
+  print_hex_byte(value);
+  _out.println(')');
 }
 
 void RF24Debug::observe_tx(uint8_t value)
 {
-  printf_P(PSTR("OBSERVE_TX=%02x: PLOS_CNT=%x ARC_CNT=%x\r\n"),
-           value,
-           (value >> PLOS_CNT) & B1111,
-           (value >> ARC_CNT) & B1111);
+  _out.print(F("OBSERVE_TX"));
+  print_hex_byte(value);
+  _out.print(F(": PLOS_CNT="));
+  _out.print((value >> PLOS_CNT) & B1111, HEX);
+  _out.print(F(" ARC_CNT="));
+  _out.println((value >> ARC_CNT) & B1111, HEX);
 }
 
 void RF24Debug::on_status(uint8_t status)
 {
-  uint8_t result = status & _BV(TX_DS);
-  Serial.println(result?"...OK.":"...Failed");
+  print_status(status);
+  _out.println(status & _BV(TX_DS)? F("...OK."): F("...Failed"));
 }
 
-void RF24Debug::on_ack(uint8_t ack_payload_length)
+void RF24Debug::on_ack(uint8_t ack_len)
 {
-    Serial.print("[AckPacket]/");
-    Serial.println(ack_payload_length,DEC);
+  _out.print(F("got ack "));
+  _out.println(ack_len);
 }
 
 void RF24Debug::on_write_payload(uint8_t data_len, uint8_t blank_len)
 {
-  printf_P(PSTR("[Writing %u bytes %u blanks]"),data_len,blank_len);
+  _out.print(F("Writing "));
+  _out.print(data_len);
+  _out.print(F(" bytes "));
+  _out.println(blank_len);
 }
 
 void RF24Debug::on_read_payload(uint8_t data_len, uint8_t blank_len)
 {
-  printf_P(PSTR("[Reading %u bytes %u blanks]"),data_len,blank_len);
+  _out.print(F("Reading "));
+  _out.print(data_len);
+  _out.print(F(" bytes "));
+  _out.println(blank_len);
 }

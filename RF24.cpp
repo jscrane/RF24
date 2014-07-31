@@ -376,8 +376,6 @@ bool RF24::write( const void* buf, uint8_t len, const bool multicast )
   bool tx_ok, tx_fail;
   whatHappened(tx_ok,tx_fail,ack_payload_available);
 
-  //printf_P("%u%u%u\r\n",tx_ok,tx_fail,ack_payload_available);
-
   result = tx_ok;
 
   // Handle the ack packet
