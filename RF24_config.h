@@ -37,6 +37,7 @@ extern HardwareSPI SPI;
 #define PROGMEM
 #define PSTR(s) (s)
 #define prog_char char
+#define __FlashStringHelper char
 
 #elif defined(ARDUINO)
 // Progmem is Arduino-specific
