@@ -24,9 +24,19 @@
 //
 
 #if defined(ENERGIA)
+#if defined(__MSP430FR5739__)
+#	define CE	P1_2
+#	define CS	P1_3
+#	define ROLE	P2_5
+#elif defined(__MSP430G2553__)
 #	define CE	P2_1
 #	define CS	P2_0
 #	define ROLE	P2_2
+//#elif defined(__LM4F120H5QR__)
+//#	define CE	PA_6
+//#	define CS	PB_5
+//#	define ROLE	PA_5
+#endif
 #	define BAUD	9600
 #else
 #	define CE	9
@@ -35,7 +45,7 @@
 #	define BAUD	57600
 #endif
 
-RF24Debug radio(CE, CS);
+RF24 radio(CE, CS);
 
 // sets the role of this unit in hardware.  Connect to GND to be the 'pong' receiver
 // Leave open to be the 'ping' transmitter
