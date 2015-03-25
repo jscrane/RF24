@@ -7,7 +7,7 @@
 #  define FLASH_PTR(x) ((const __FlashStringHelper *)x)
 #endif
 
-void RF24Debug::print_name(const prog_char *name)
+void RF24Debug::print_name(const char *name)
 {
   _out.print(FLASH_PTR(name));
   if (strlen_P(name) < 8)
@@ -23,7 +23,7 @@ void RF24Debug::print_hex_byte(uint8_t b)
     _out.print(b, HEX);
 }
 
-void RF24Debug::print_byte_register(const prog_char *name, uint8_t reg, uint8_t qty)
+void RF24Debug::print_byte_register(const char *name, uint8_t reg, uint8_t qty)
 {
   print_name(name);
   while (qty--)
@@ -31,7 +31,7 @@ void RF24Debug::print_byte_register(const prog_char *name, uint8_t reg, uint8_t 
   _out.println();
 }
 
-void RF24Debug::print_address_register(const prog_char *name, uint8_t reg, uint8_t qty)
+void RF24Debug::print_address_register(const char *name, uint8_t reg, uint8_t qty)
 {
   print_name(name);
 

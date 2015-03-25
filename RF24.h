@@ -662,7 +662,7 @@ class RF24Debug: public RF24
 private:
   Print &_out;
 
-  void print_name(const prog_char *name);
+  void print_name(const char *name);
 
   void print_hex_byte(uint8_t b);
 
@@ -686,7 +686,7 @@ private:
    * @param reg Which register. Use constants from nRF24L01.h
    * @param qty How many successive registers to print
    */
-  void print_byte_register(const prog_char *name, uint8_t reg, uint8_t qty = 1);
+  void print_byte_register(const char *name, uint8_t reg, uint8_t qty = 1);
 
   /**
    * Print the name and value of a 40-bit address register to stdout
@@ -699,7 +699,7 @@ private:
    * @param reg Which register. Use constants from nRF24L01.h
    * @param qty How many successive registers to print
    */
-  void print_address_register(const prog_char *name, uint8_t reg, uint8_t qty = 1);
+  void print_address_register(const char *name, uint8_t reg, uint8_t qty = 1);
 
 protected:
   void on_write_register(uint8_t reg, uint8_t value);

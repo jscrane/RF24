@@ -36,7 +36,6 @@ extern HardwareSPI SPI;
 #define _BV(x) (1 << (x))
 #define PROGMEM
 #define PSTR(s) (s)
-#define prog_char char
 #define __FlashStringHelper char
 
 #elif defined(ARDUINO)
