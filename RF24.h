@@ -18,6 +18,7 @@
 
 #include <nRF24L01.h>
 #include <RF24_config.h>
+#include <WString.h>
 
 /**
  * Power Amplifier level.
@@ -56,6 +57,7 @@ private:
   bool dynamic_payloads_enabled; /**< Whether dynamic payloads are enabled. */ 
   uint8_t ack_payload_length; /**< Dynamic size of pending ack payload. */
   uint64_t pipe0_reading_address; /**< Last address set on pipe 0 for reading. */
+  String receivedString; 
 protected:
   /* debugging interface: does nothing by default */
   virtual void on_write_register(uint8_t reg, uint8_t value) {}
@@ -252,6 +254,35 @@ public:
    *
    * @return True if there is a payload available, false if none is
    */
+
+  bool sendtxt(const String& thisIsString, uint64_t wpipe, uint64_t rpipe);
+
+  /**
+   * Fetches the string and sends it to receiver
+   *
+   * @Waits for acknowledge from receiver
+   *
+   * @returns True if string is received successfully, false if it doesn't receive any response
+   */
+  
+  bool gettxt(uint64_t wpipe, uint64_t rpipe);
+
+  /**
+   * Checks for availability of string and fetches the string
+   *
+   * @Sends acknowledge to transmitter
+   *
+   * Stores text in constant variable
+   */
+
+  String fetchtxt(void);
+
+  /**
+   * Fetches the received text.
+   *
+   * Its an object handle
+   */
+
   bool available(void);
 
   /**

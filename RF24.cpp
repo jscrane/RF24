@@ -8,6 +8,7 @@
  */
 
 #include "RF24.h"
+#include <SPI.h>
 
 
 /****************************************************************************/
@@ -305,7 +306,7 @@ void RF24::startListening(void)
   ce(HIGH);
 
   // wait for the radio to come up (130us actually only needed)
-  delayMicroseconds(130);
+  delayMicroseconds(150);
 }
 
 /****************************************************************************/
@@ -315,6 +316,8 @@ void RF24::stopListening(void)
   ce(LOW);
   flush_tx();
   flush_rx();
+  // wait for the radio to go down (130us actually only needed)
+  delayMicroseconds(150);
 }
 
 /****************************************************************************/
@@ -342,7 +345,7 @@ bool RF24::write( const void* buf, uint8_t len, const bool multicast )
   startWrite( buf, len, multicast );
 
   // ------------
-  // At this point we could return from a non-blocking write, and then call
+  // At this point we could return from a non-blocking write, and then calt
   // the rest after an interrupt
 
   // Instead, we are going to block here until we get TX_DS (transmission completed and ack'd)
@@ -388,7 +391,153 @@ bool RF24::write( const void* buf, uint8_t len, const bool multicast )
   return result;
 }
 /****************************************************************************/
+/****************************************************************************/
 
+bool RF24::sendtxt(const String& thisIsString, uint64_t wpipe, uint64_t rpipe)
+{
+  stopListening();
+  openWritingPipe(wpipe);
+  int messageSize = thisIsString.length();
+  bool wait = true, ack  = false;
+  int recheck = 5;
+  String sendThis= "";
+  sendThis = String(messageSize, DEC) + "~" + thisIsString + "^";
+  messageSize = sendThis.length();
+  for (int i = 0; i < messageSize; i++) {
+    int charToSend[1];
+    charToSend[0] = sendThis.charAt(i);
+    write(charToSend,1);
+  } 
+
+  openReadingPipe(1,rpipe);
+  startListening();
+  delayMicroseconds(150);
+
+  while(wait && (recheck != 0)){
+  if (available()){    
+      bool done = false; 
+      int msg[1];
+      done = read(msg, 1); 
+      if (msg[0] == int('a'))
+       {
+        ack = true;
+	wait = false;
+       }
+      else if(msg[0] == int('n'))
+       {
+        ack = false;
+	wait = false;
+       }
+      else
+	recheck--;
+    }
+  else
+  {
+    delay(20);
+    recheck--;
+  }
+  }
+
+  return ack;
+
+}
+
+/****************************************************************************/
+
+bool RF24::gettxt(uint64_t wpipe, uint64_t rpipe)
+{
+  unsigned int strcheck = 0, count = 0;
+  bool gotChecksum = false;
+  bool rxComplete = false;
+  bool getdone = false;
+  bool validtxt = false;
+  int msg[1];
+  int recheck = 10;
+  String theMessage = "";
+  String checksum = "";
+  //receivedString = "";  
+  
+  while(!getdone && (recheck != 0))
+  {
+  if (available()){
+      bool done = false;  
+      done = read(msg, 1); 
+      char theChar = msg[0];
+      
+      if(!gotChecksum)
+      {
+	  if (msg[0] != int('~'))
+	  {
+	    checksum.concat(theChar);
+	  }
+	  else
+	  {
+	    strcheck = checksum.toInt();
+	    gotChecksum = true;
+	  }
+      }
+    
+      if (gotChecksum && (msg[0] != int('~')))
+      {  
+	  if (msg[0] != int('^'))
+	  {
+	    theMessage.concat(theChar);
+	  }
+	  else 
+	  {
+	    count = theMessage.length();
+	    receivedString = theMessage;
+	    gotChecksum = false;
+	    rxComplete = true;
+	  }
+      }
+    
+  }
+  else if(rxComplete)
+  {
+    stopListening();
+    openWritingPipe(wpipe);
+    delayMicroseconds(150);
+    if(strcheck == count)
+    {
+      int ack[1];
+      ack[0] = 'a';  
+      write(ack,1);
+      validtxt = true;
+    }
+    else
+    {
+      int ack[1];
+      ack[0] = 'n';  
+      write(ack,1);
+      validtxt = false;
+    }
+    
+    getdone = true;
+    rxComplete = false;
+    strcheck = 0;
+    count = 0;
+    openReadingPipe(1,rpipe);
+    startListening(); 
+  }
+  else
+  {
+    delay(20);
+    recheck--;
+  }
+  }
+  
+  return validtxt;
+}
+
+/****************************************************************************/
+
+String RF24::fetchtxt(void)
+{
+  return receivedString;
+}
+
+/****************************************************************************/
 void RF24::startWrite( const void* buf, uint8_t len, const bool multicast )
 {
   // Transmitter power-up
