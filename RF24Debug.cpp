@@ -117,6 +117,16 @@ void RF24Debug::printDetails(void)
   print_byte_register(PSTR("CONFIG"),CONFIG);
   print_byte_register(PSTR("DYNPD/FEATURE"),DYNPD,2);
 
+#if defined(ESP8266)
+  _out.print(F("Data Rate\t = "));
+  _out.println(FLASH_PTR(pgm_read_dword(&rf24_datarate_e_str_P[getDataRate()])));
+  _out.print(F("Model\t\t = "));
+  _out.println(FLASH_PTR(pgm_read_dword(&rf24_model_e_str_P[isPVariant()])));
+  _out.print(F("CRC Length\t = "));
+  _out.println(FLASH_PTR(pgm_read_dword(&rf24_crclength_e_str_P[getCRCLength()])));
+  _out.print(F("PA Power\t = "));
+  _out.println(FLASH_PTR(pgm_read_dword(&rf24_pa_dbm_e_str_P[getPALevel()])));
+#else
   _out.print(F("Data Rate\t = "));
   _out.println(FLASH_PTR(pgm_read_word(&rf24_datarate_e_str_P[getDataRate()])));
   _out.print(F("Model\t\t = "));
@@ -125,6 +135,7 @@ void RF24Debug::printDetails(void)
   _out.println(FLASH_PTR(pgm_read_word(&rf24_crclength_e_str_P[getCRCLength()])));
   _out.print(F("PA Power\t = "));
   _out.println(FLASH_PTR(pgm_read_word(&rf24_pa_dbm_e_str_P[getPALevel()])));
+#endif
 }
 
 void RF24Debug::on_write_register(uint8_t reg, uint8_t value)

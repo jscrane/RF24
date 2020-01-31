@@ -272,7 +272,7 @@ void RF24::begin(void)
 
   // Reset current status
   // Notice reset and flush is the last thing we do
-  write_register(STATUS,_BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT) );
+  write_register(STATUS_,_BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT) );
 
   // Set up default configuration.  Callers can always change it later.
   // This channel should be universally safe and not bleed over into adjacent
@@ -289,7 +289,7 @@ void RF24::begin(void)
 void RF24::startListening(void)
 {
   write_register(CONFIG, read_register(CONFIG) | _BV(PWR_UP) | _BV(PRIM_RX));
-  write_register(STATUS, _BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT) );
+  write_register(STATUS_, _BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT) );
 
   // Restore the pipe0 adddress, if exists
   if (pipe0_reading_address)
@@ -444,12 +444,12 @@ bool RF24::available(uint8_t* pipe_num)
     // ??? Should this REALLY be cleared now?  Or wait until we
     // actually READ the payload?
 
-    write_register(STATUS,_BV(RX_DR) );
+    write_register(STATUS_,_BV(RX_DR) );
 
     // Handle ack payload receipt
     if ( status & _BV(TX_DS) )
     {
-      write_register(STATUS,_BV(TX_DS));
+      write_register(STATUS_,_BV(TX_DS));
     }
   }
 
@@ -473,7 +473,7 @@ void RF24::whatHappened(bool& tx_ok,bool& tx_fail,bool& rx_ready)
 {
   // Read the status & reset the status in one easy call
   // Or is that such a good idea?
-  uint8_t status = write_register(STATUS,_BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT) );
+  uint8_t status = write_register(STATUS_,_BV(RX_DR) | _BV(TX_DS) | _BV(MAX_RT) );
 
   on_status(status);
 
